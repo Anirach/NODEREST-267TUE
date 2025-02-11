@@ -3,6 +3,7 @@
 // npm install express sequelize sqlite3
 // Run this file with node SequlizeSQLiteCRUDBook.js
 // Test with Postman
+
 require("dotenv").config();
 
 const express = require('express');
@@ -16,7 +17,7 @@ app.use(express.json());
 const sequelize = new Sequelize('database', 'username', 'password', {
   host: 'localhost',
   dialect: 'sqlite',
-  storage: './Database/Books.sqlite'
+  storage: './Books.sqlite'
 });
 
 // define the Book model
@@ -107,3 +108,4 @@ app.delete('/books/:id', (req, res) => {
 // start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server is running on http://localhost:${port}`));
+
