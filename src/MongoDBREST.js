@@ -6,14 +6,16 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+mongoose.set('useFindAndModify', false);
 const app = express();
 app.use(express.json());
 
 // Connect to the MongoDB database
-mongoose.connect('mongodb://admin:LQZkkg73929@node71378-node267tue.proen.app.ruk-com.cloud:11722', {
+mongoose.connect('mongodb://admin:SBFsqa14913@node40731-noderest.proen.app.ruk-com.cloud:11344', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+
 // Define the book model
 const bookSchema = new mongoose.Schema({
   id : Number,
