@@ -1,7 +1,6 @@
 // Description: REST API with MongoDB
-// Date: 03/29/2020
 // npm install express mongoose
-// Run this file with node MongoDBREST.js
+// Run this file with node index.js
 // Test with Postman
 
 const express = require('express');
@@ -24,93 +23,46 @@ const bookSchema = new mongoose.Schema({
 const Book = mongoose.model('Book', bookSchema);
 
 // API routes
-
-// Create a new book
-app.post('/books', (req, res) => {
-  Book.aggregate([{ $group: { _id: null, maxId: { $max: "$id" } } }], (err, maxId) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      const book = new Book({
-        id: maxId[0].maxId + 1,
-        title: req.body.title,
-        author: req.body.author
-      });
-      book.save((err, book) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.send(book);
-        }
-      });
-    }
+// Create a new book with auto-increase id 1,2,3,4,5...
+app.post('/books', async (req, res) => {
+  const lastBook = await Book.findOne().sort({ id: -1 });
+  const newId = lastBook ? lastBook.id + 1 : 1;
+  const book = new Book({
+    id: newId,
+    title: req.body.title,
+    author: req.body.author
   });
-});
+  await book.save();
+  res.send(book);
+}
+);
 
-
+// route /books will be used to get all books
 // Get a list of all books
-app.get('/books', (req, res) => {
-  Book.find((err, books) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send(books);
-    }
-  });
+app.get('/books', async (req, res) => {
+  const books = await Book.find();
+  res.send(books);
 });
 
 // Get a single book by id
-app.get('/books/:id', (req, res) => {
-//Book.findById(req.params.id, (err, book) => {
-//    if (err) {
-//      res.status(500).send(err);
-//    } else {
-//      res.send(book);
-//    }
-//  });
-  Book.findOne({id: req.params.id}, (err, book) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send(book);
-    } 
-  });
+app.get('/books/:id', async (req, res) => {
+  const book = await Book.findOne({ id: req.params.id });
+  res.send(book);
 });
 
 // Update a book
-app.put('/books/:id', (req, res) => {
-  //Book.findByIdAndUpdate(req.params.id, req.body, { new: true }, (err, book) => {
-  //  if (err) {
-  //    res.status(500).send(err);
-  //  } else {
-  //    res.send(book);
-  //  }
-  //});
-  Book.findOneAndUpdate({id: req.params.id}, req.body, { new: true }, (err, book) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send(book);
-    }
-});
+app.put('/books/:id', async (req, res) => {
+  const book = await Book.findOne({ id: req.params.id });
+  book.title = req.body.title;
+  book.author = req.body.author;
+  await book.save();
+  res.send(book);
 });
 
 // Delete a book
-app.delete('/books/:id', (req, res) => {
-  //Book.findByIdAndRemove(req.params.id, (err, book) => {
-  //  if (err) {
-  //    res.status(500).send(err);
-  //  } else {
-  //    res.send(book);
-  //  }
-  //});
-  Book.findOneAndRemove({id: req.params.id}, (err, book) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send(book);
-    }
-  });
+app.delete('/books/:id', async (req, res) => {
+  const result = await Book.deleteOne({ id: req.params.id });
+  res.send(result);
 });
 
 
